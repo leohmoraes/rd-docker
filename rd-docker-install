@@ -1,0 +1,20 @@
+#!/bin/sh
+
+INSTALL_DIR="/opt/rd-docker"
+BIN_DIR="/usr/local/bin"
+REPOSITORY="https://github.com/ResultadosDigitais/rd-docker.git"
+
+clone_repository() {
+  git clone "$REPOSITORY" "$INSTALL_DIR"
+}
+
+create_symlink() {
+  ln -s "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
+}
+
+do_install() {
+  clone_repository
+  create_symlink
+}
+
+do_install
