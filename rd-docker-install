@@ -10,6 +10,13 @@ echo_command() {
   echo "$command_indicator $1"
 }
 
+check_for_sudo() {
+  if [ $(id -u) -ne 0 ] ; then
+    echo_command "Please run as root"
+    exit 1
+  fi
+}
+
 clone_repository() {
   echo_command "Clonning repository"
   git clone "$REPOSITORY" "$INSTALL_DIR"
@@ -27,4 +34,5 @@ do_install() {
   echo_command "Instalation finished successfully"
 }
 
+check_for_sudo
 do_install
