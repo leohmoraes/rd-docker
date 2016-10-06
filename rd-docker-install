@@ -4,17 +4,27 @@ INSTALL_DIR="/opt/rd-docker"
 BIN_DIR="/usr/local/bin"
 REPOSITORY="https://github.com/ResultadosDigitais/rd-docker.git"
 
+command_indicator=">"
+
+echo_command() {
+  echo "$command_indicator $1"
+}
+
 clone_repository() {
+  echo_command "Clonning repository"
   git clone "$REPOSITORY" "$INSTALL_DIR"
 }
 
 create_symlink() {
+  echo_command "Creating symlink"
   ln -s "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
 }
 
 do_install() {
+  echo_command "Initializing rd-docker instalation proccess"
   clone_repository
   create_symlink
+  echo_command "Instalation finished successfully"
 }
 
 do_install
