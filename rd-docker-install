@@ -17,6 +17,18 @@ check_for_sudo() {
   fi
 }
 
+check_if_already_installed() {
+  if [ -d "$INSTALL_DIR" ]; then
+    echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
+    echo_command "You can do this by running the following command:"
+    echo_command ""
+    echo_command "$ sudo rm -rf $INSTALL_DIR $BIN_DIR/rd-docker"
+    echo_command ""
+    echo_command "After that run this script again to reinstall rd-docker."
+    exit 1
+  fi
+}
+
 clone_repository() {
   echo_command "Clonning repository"
   git clone "$REPOSITORY" "$INSTALL_DIR"
@@ -24,10 +36,11 @@ clone_repository() {
 
 create_symlink() {
   echo_command "Creating symlink"
-  ln -s "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
+  ln -sf "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
 }
 
 do_install() {
+  check_if_already_installed
   echo_command "Initializing rd-docker instalation proccess"
   clone_repository
   create_symlink
