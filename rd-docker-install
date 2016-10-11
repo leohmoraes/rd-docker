@@ -17,6 +17,10 @@ check_for_sudo() {
   fi
 }
 
+command_exists() {
+  command -v "$@" > /dev/null 2>&1
+}
+
 check_if_already_installed() {
   if [ -d "$INSTALL_DIR" ]; then
     echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
@@ -39,12 +43,51 @@ create_symlink() {
   ln -sf "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
 }
 
+install_docker() {
+  if command_exists "docker"; then
+    echo_command "Docker engine is already installed on your system"
+    return
+  fi
+  echo_command "Installing Docker Engine"
+  curl -fsS https://get.docker.com/ | bash
+}
+
+install_docker_compose() {
+  if command_exists "docker-compose"; then
+    echo_command "Docker Compose is already installed on your system"
+    return
+  fi
+  echo_command "Installing Docker Compose"
+  curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
+}
+
+install_engine(){
+  case `uname` in
+    'Linux')
+      install_docker
+      install_docker_compose
+      ;;
+    'Darwin')
+      echo_command "Please follow the following instructions to install docker engine on Mac OS X"
+      echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker#mac-os-x-109"
+      ;;
+    *)
+      echo_command "Failed to automatically install Docker engine and Docker Compose."
+      echo_command "Please check the following link for installing it in your OS and"
+      echo_command "if there is no information, please update it."
+      echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker \n"
+      ;;
+  esac
+}
+
 do_install() {
   check_if_already_installed
   echo_command "Initializing rd-docker instalation proccess"
   clone_repository
   create_symlink
-  echo_command "Instalation finished successfully"
+  install_engine
+  echo_command "Instalation finished successfully\n"
 }
 
 check_for_sudo
