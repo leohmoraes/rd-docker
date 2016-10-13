@@ -21,6 +21,14 @@ command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
 
+check_dependency() {
+  if ! command_exists "$1"; then
+    echo_command "Missing dependency: $1 must be installed."
+    echo_command "Please install $1 first then run this installer again."
+    exit 1
+  fi
+}
+
 check_if_already_installed() {
   if [ -d "$INSTALL_DIR" ]; then
     echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
@@ -34,6 +42,7 @@ check_if_already_installed() {
 }
 
 clone_repository() {
+  check_dependency "git"
   echo_command "Clonning repository"
   git clone "$REPOSITORY" "$INSTALL_DIR"
 }
