@@ -1,0 +1,126 @@
+#!/bin/sh
+
+INSTALL_DIR="/opt/rd-docker"
+BIN_DIR="/usr/local/bin"
+REPOSITORY="https://github.com/ResultadosDigitais/rd-docker.git"
+
+command_indicator=">"
+
+echo_command() {
+  echo "$command_indicator $1"
+}
+
+check_for_sudo() {
+  if [ $(id -u) -ne 0 ] ; then
+    echo_command "Please run as root"
+    exit 1
+  fi
+}
+
+command_exists() {
+  command -v "$@" > /dev/null 2>&1
+}
+
+check_dependency() {
+  if ! command_exists "$1"; then
+    echo_command "Missing dependency: $1 must be installed."
+    echo_command "Please install $1 first then run this installer again."
+    exit 1
+  fi
+}
+
+check_if_already_installed() {
+  if [ -d "$INSTALL_DIR" ]; then
+    echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
+    echo_command "You can do this by running the following command:"
+    echo_command ""
+    echo_command "$ sudo rm -rf $INSTALL_DIR $BIN_DIR/rd-docker"
+    echo_command ""
+    echo_command "After that run this script again to reinstall rd-docker."
+    exit 1
+  fi
+}
+
+check_dependencies() {
+  check_dependency "git"
+  check_dependency "curl"
+}
+
+clone_repository() {
+  echo_command "Clonning repository"
+  git clone "$REPOSITORY" "$INSTALL_DIR"
+}
+
+create_symlink() {
+  echo_command "Creating symlink"
+  ln -sf "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
+}
+
+is_installed() {
+  if command_exists "$1";then
+    echo_command "$1 is already installed on your system"
+    true
+  else
+    false
+  fi
+}
+
+try_to_install_engine_on_linux() {
+  if ! is_installed "docker"; then
+    install_docker
+  fi
+
+  if ! is_installed "docker-compose"; then
+    install_docker_compose
+  fi
+}
+
+install_docker() {
+  echo_command "Installing Docker Engine"
+  curl -fsS https://get.docker.com/ | bash
+}
+
+install_docker_compose() {
+  echo_command "Installing Docker Compose"
+  curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
+}
+
+show_instructions_for_mac_os_x() {
+  echo_command "Please follow the following instructions to install docker engine on Mac OS X"
+  echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker#mac-os-x-109"
+}
+
+show_instructions_for_other_os() {
+  echo_command "Failed to automatically install Docker engine and Docker Compose."
+  echo_command "Please check the following link for installing it in your OS and"
+  echo_command "if there is no information, please update it."
+  echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker \n"
+}
+
+install_engine(){
+  case `uname` in
+    'Linux')
+      try_to_install_engine_on_linux
+      ;;
+    'Darwin')
+      show_instructions_for_mac_os_x
+      ;;
+    *)
+      show_instructions_for_other_os
+      ;;
+  esac
+}
+
+do_install() {
+  check_if_already_installed
+  check_dependencies
+  echo_command "Initializing rd-docker instalation proccess"
+  clone_repository
+  create_symlink
+  install_engine
+  echo_command "Instalation finished successfully\n"
+}
+
+check_for_sudo
+do_install
