@@ -41,8 +41,12 @@ check_if_already_installed() {
   fi
 }
 
-clone_repository() {
+check_dependencies() {
   check_dependency "git"
+  check_dependency "curl"
+}
+
+clone_repository() {
   echo_command "Clonning repository"
   git clone "$REPOSITORY" "$INSTALL_DIR"
 }
@@ -52,46 +56,65 @@ create_symlink() {
   ln -sf "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
 }
 
-install_docker() {
-  if command_exists "docker"; then
-    echo_command "Docker engine is already installed on your system"
-    return
+is_installed() {
+  if command_exists "$1";then
+    echo_command "$1 is already installed on your system"
+    true
+  else
+    false
   fi
+}
+
+try_to_install_engine_on_linux() {
+  if ! is_installed "docker"; then
+    install_docker
+  fi
+
+  if ! is_installed "docker-compose"; then
+    install_docker_compose
+  fi
+}
+
+install_docker() {
   echo_command "Installing Docker Engine"
   curl -fsS https://get.docker.com/ | bash
 }
 
 install_docker_compose() {
-  if command_exists "docker-compose"; then
-    echo_command "Docker Compose is already installed on your system"
-    return
-  fi
   echo_command "Installing Docker Compose"
   curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
   chmod +x /usr/local/bin/docker-compose
 }
 
+show_instructions_for_mac_os_x() {
+  echo_command "Please follow the following instructions to install docker engine on Mac OS X"
+  echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker#mac-os-x-109"
+}
+
+show_instructions_for_other_os() {
+  echo_command "Failed to automatically install Docker engine and Docker Compose."
+  echo_command "Please check the following link for installing it in your OS and"
+  echo_command "if there is no information, please update it."
+  echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker \n"
+}
+
 install_engine(){
   case `uname` in
     'Linux')
-      install_docker
-      install_docker_compose
+      try_to_install_engine_on_linux
       ;;
     'Darwin')
-      echo_command "Please follow the following instructions to install docker engine on Mac OS X"
-      echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker#mac-os-x-109"
+      show_instructions_for_mac_os_x
       ;;
     *)
-      echo_command "Failed to automatically install Docker engine and Docker Compose."
-      echo_command "Please check the following link for installing it in your OS and"
-      echo_command "if there is no information, please update it."
-      echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker \n"
+      show_instructions_for_other_os
       ;;
   esac
 }
 
 do_install() {
   check_if_already_installed
+  check_dependencies
   echo_command "Initializing rd-docker instalation proccess"
   clone_repository
   create_symlink
