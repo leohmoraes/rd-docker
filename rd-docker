@@ -2,8 +2,20 @@
 
 command=$1
 
+CURRENT_DIR="$(pwd)"
+CONFIG_FILE="rd-docker.config"
 header_indicator="==========>"
 command_indicator=">"
+
+load_config_file(){
+  file_path="$CURRENT_DIR/$CONFIG_FILE"
+
+  if [[ ! -f "$file_path" ]]; then
+    echo_command "Configuration file missing: rd-docker.config not found in current directory"
+    exit 1
+  fi
+  source "$file_path"
+}
 
 get_container_id(){
   app=$1
@@ -34,7 +46,7 @@ ensure_volumes(){
 
 ensure_uptodate_image(){
   echo_command "Checking image updates..."
-  docker pull $IMAGE_NAME:$TAG
+  docker pull $IMAGE
 }
 
 # Housekeeping methods
@@ -123,6 +135,8 @@ show_exec_help(){
   echo_command "    container_app - name of the app container (see 'docker-compose.yml' for container names)"
   echo_command "    command       - command to be run inside the chosen container"
 }
+
+load_config_file
 
 echo "$header_indicator Docker: $command"
 case "$command" in
