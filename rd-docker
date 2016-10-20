@@ -17,6 +17,13 @@ load_config_file(){
   source "$file_path"
 }
 
+ensure_app_prefix(){
+  if [[ "$APP_PREFIX" == "" ]]; then
+    dirname="${CURRENT_DIR##*/}"
+    APP_PREFIX="$(echo $dirname | sed 's/[-_ ]//g')_"
+  fi
+}
+
 get_container_id(){
   app=$1
 
@@ -110,7 +117,7 @@ raise_infrastructure(){
   echo_command "Raising infrastructure"
   ensure_volumes
   ensure_uptodate_image
-  docker-compose run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
+  docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
 }
 
 # Instrumentation methods
@@ -137,6 +144,7 @@ show_exec_help(){
 }
 
 load_config_file
+ensure_app_prefix
 
 echo "$header_indicator Docker: $command"
 case "$command" in
