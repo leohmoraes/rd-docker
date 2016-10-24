@@ -32,7 +32,7 @@ validate_config(){
 ensure_app_prefix(){
   if [[ "$APP_PREFIX" == "" ]]; then
     dirname="${CURRENT_DIR##*/}"
-    APP_PREFIX="$(echo $dirname | sed 's/[-_ ]//g')_"
+    APP_PREFIX="$(echo $dirname | sed 's/[-_ ]//g')"
   fi
 }
 
@@ -43,7 +43,7 @@ get_container_id(){
     app=$MAIN_CONTAINER_NAME
   fi
 
-  docker ps | grep $APP_PREFIX$app | awk '{print $1}'
+  docker ps | grep "${APP_PREFIX}_${app}" | awk '{print $1}'
 }
 
 # Validation methods
@@ -55,12 +55,12 @@ ensure_uptodate_image(){
 # Housekeeping methods
 clear_containers(){
   echo_command "Removing possibly existing containers"
-  docker rm -f $(docker ps -a | grep $APP_PREFIX | awk '{ print $1 }') >> /dev/null 2>&1
+  docker rm -f $(docker ps -a | grep "${APP_PREFIX}_" | awk '{ print $1 }') >> /dev/null 2>&1
 }
 
 clear_volumes(){
   echo_command "Removing possibly existing volumes"
-  docker volume rm $(docker volume ls -q | grep $APP_PREFIX) >> /dev/null 2>&1
+  docker volume rm $(docker volume ls -q | grep "${APP_PREFIX}_") >> /dev/null 2>&1
 }
 
 # Infrastructure methods
@@ -112,7 +112,7 @@ execute_command() {
 raise_infrastructure(){
   echo_command "Raising infrastructure"
   ensure_uptodate_image
-  docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
+  APP_PREFIX=$APP_PREFIX docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
 }
 
 # Instrumentation methods
