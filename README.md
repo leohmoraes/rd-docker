@@ -39,18 +39,6 @@ The prefix which will be used on container names. Project folder name is used if
 APP_PREFIX="rdstation_"
 ```
 
-#### VOLUME_NAMES (optional):
-
-The volume names to rd-docker create and ensure the existence before starting containers.
-
-```
-VOLUME_NAMES=(
-  "rdstation_postgres"
-  "rdstation_mongo"
-  "rdstation_redis"
-)
-```
-
 ## Usage
 
 All rd-docker commands should be executed on your project root folder.

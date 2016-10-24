@@ -35,22 +35,6 @@ get_container_id(){
 }
 
 # Validation methods
-ensure_volume(){
-  volume_id=$(docker volume ls -q | grep $1)
-
-  if [[ "$volume_id" == "" ]]; then
-    echo_command "Creating volume for $1"
-    docker volume create --name $1
-  fi
-}
-
-ensure_volumes(){
-  for i in "${VOLUME_NAMES[@]}"
-  do
-     ensure_volume $i
-  done
-}
-
 ensure_uptodate_image(){
   echo_command "Checking image updates..."
   docker pull $IMAGE
@@ -115,7 +99,6 @@ execute_command() {
 
 raise_infrastructure(){
   echo_command "Raising infrastructure"
-  ensure_volumes
   ensure_uptodate_image
   docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
 }
