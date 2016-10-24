@@ -17,6 +17,18 @@ load_config_file(){
   source "$file_path"
 }
 
+validate_required_config(){
+  if [[ "${!1}" == "" ]]; then
+    echo_command "Configuration missing: $1 is requried. Please configure it on rd-docker.config"
+    exit 1
+  fi
+}
+
+validate_config(){
+  validate_required_config "IMAGE"
+  validate_required_config "MAIN_CONTAINER_NAME"
+}
+
 ensure_app_prefix(){
   if [[ "$APP_PREFIX" == "" ]]; then
     dirname="${CURRENT_DIR##*/}"
@@ -127,6 +139,7 @@ show_exec_help(){
 }
 
 load_config_file
+validate_config
 ensure_app_prefix
 
 echo "$header_indicator Docker: $command"
