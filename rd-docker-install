@@ -1,8 +1,8 @@
 #!/bin/sh
 
 INSTALL_DIR="/opt/rd-docker"
-BIN_DIR="/usr/local/bin"
-REPOSITORY="https://github.com/ResultadosDigitais/rd-docker.git"
+BIN_PATH="/usr/local/bin/rd-docker"
+DOWNLOAD_URL="https://raw.githubusercontent.com/ResultadosDigitais/rd-docker/master/rd-docker"
 
 command_indicator=">"
 
@@ -30,11 +30,11 @@ check_dependency() {
 }
 
 check_if_already_installed() {
-  if [ -d "$INSTALL_DIR" ]; then
+  if [ -f "$BIN_PATH" ]; then
     echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
     echo_command "You can do this by running the following command:"
     echo_command ""
-    echo_command "$ sudo rm -rf $INSTALL_DIR $BIN_DIR/rd-docker"
+    echo_command "$ sudo rm -rf $BIN_PATH"
     echo_command ""
     echo_command "After that run this script again to reinstall rd-docker."
     exit 1
@@ -46,14 +46,14 @@ check_dependencies() {
   check_dependency "curl"
 }
 
-clone_repository() {
-  echo_command "Clonning repository"
-  git clone "$REPOSITORY" "$INSTALL_DIR"
+download_executable() {
+  echo_command "Downloading rd-docker executable"
+  curl -o "$BIN_PATH" "$DOWNLOAD_URL"
 }
 
-create_symlink() {
-  echo_command "Creating symlink"
-  ln -sf "${INSTALL_DIR}/rd-docker" "$BIN_DIR"
+mark_as_executable() {
+  echo_command "Setting file permissions"
+  chmod +x "$BIN_PATH"
 }
 
 is_installed() {
@@ -116,8 +116,8 @@ do_install() {
   check_if_already_installed
   check_dependencies
   echo_command "Initializing rd-docker instalation proccess"
-  clone_repository
-  create_symlink
+  download_executable
+  mark_as_executable
   install_engine
   echo_command "Instalation finished successfully\n"
 }
