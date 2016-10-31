@@ -4,6 +4,7 @@ command=$1
 
 CURRENT_DIR="$(pwd)"
 CONFIG_FILE="rd-docker.config"
+RD_DOCKER_DIR="$(dirname $0)"
 header_indicator="==========>"
 command_indicator=">"
 
@@ -44,6 +45,12 @@ get_container_id(){
   fi
 
   docker ps | grep "${APP_PREFIX}_${app}" | awk '{print $1}'
+}
+
+update_script(){
+  echo_command "Updating rd-docker script"
+  git -C "$RD_DOCKER_DIR" checkout master
+  git -C "$RD_DOCKER_DIR" pull origin master
 }
 
 # Validation methods
@@ -123,6 +130,7 @@ echo_command(){
 show_help(){
   echo_command "RD Docker usage:"
   echo_command "  install    - install docker and dependencies"
+  echo_command "  update     - update rd-docker script"
   echo_command "  reset      - stop and remove all containers and drops all volumes within the compose "
   echo_command "  stop       - stop and remove all containers within the compose"
   echo_command "  start, s   - execute web aplication on main container"
@@ -146,6 +154,10 @@ echo "$header_indicator Docker: $command"
 case "$command" in
   install)
     install_engine
+    exit 0
+    ;;
+  update)
+    update_script
     exit 0
     ;;
   reset)
