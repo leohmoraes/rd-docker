@@ -26,32 +26,20 @@ validate_required_config(){
   fi
 }
 
-validate_config(){
+validate_required_configs(){
   validate_required_config "IMAGE"
   validate_required_config "MAIN_CONTAINER_NAME"
+  validate_required_config "APP_PREFIX"
 }
 
-ensure_app_prefix(){
-  if [[ "$APP_PREFIX" == "" ]]; then
-    dirname="${CURRENT_DIR##*/}"
-    APP_PREFIX="$(echo $dirname | sed 's/[-_ ]//g')"
-  fi
-}
-
-load_and_validate_config(){
-  load_config_file
-  validate_config
-  ensure_app_prefix
-}
-
-check_for_updates(){
+ensure_uptodate_rddocker(){
   touch "$UPDATE_CHECK_FILE"
 
   today="$(date +%Y%m%d)"
   last_update_check="$(cat $UPDATE_CHECK_FILE)"
 
   if [[ "$today" > "$last_update_check" ]]; then
-    update_script
+    update_rddocker
     echo "$today" > "$UPDATE_CHECK_FILE"
   fi
 }
@@ -66,7 +54,7 @@ get_container_id(){
   docker ps | grep "${APP_PREFIX}_${app}" | awk '{print $1}'
 }
 
-update_script(){
+update_rddocker(){
   echo_command "Updating rd-docker script"
   git -C "$RD_DOCKER_DIR" checkout master
   git -C "$RD_DOCKER_DIR" pull origin master
@@ -165,8 +153,9 @@ show_exec_help(){
   echo_command "    command       - command to be run inside the chosen container"
 }
 
-check_for_updates
-load_and_validate_config
+ensure_uptodate_rddocker
+load_config_file
+validate_required_configs
 
 echo "$header_indicator Docker: $command"
 case "$command" in
@@ -175,7 +164,7 @@ case "$command" in
     exit 0
     ;;
   update)
-    update_script
+    update_rddocker
     exit 0
     ;;
   reset)

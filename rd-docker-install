@@ -1,6 +1,5 @@
 #!/bin/sh
 
-INSTALL_DIR="/opt/rd-docker"
 BIN_PATH="/usr/local/bin/rd-docker"
 DOWNLOAD_URL="https://raw.githubusercontent.com/ResultadosDigitais/rd-docker/master/rd-docker"
 
@@ -10,7 +9,7 @@ echo_command() {
   echo "$command_indicator $1"
 }
 
-check_for_sudo() {
+validate_user_permission() {
   if [ $(id -u) -ne 0 ] ; then
     echo_command "Please run as root"
     exit 1
@@ -21,7 +20,7 @@ command_exists() {
   command -v "$@" > /dev/null 2>&1
 }
 
-check_dependency() {
+validate_dependency() {
   if ! command_exists "$1"; then
     echo_command "Missing dependency: $1 must be installed."
     echo_command "Please install $1 first then run this installer again."
@@ -29,30 +28,27 @@ check_dependency() {
   fi
 }
 
-check_if_already_installed() {
-  if [ -f "$BIN_PATH" ]; then
-    echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
-    echo_command "You can do this by running the following command:"
-    echo_command ""
-    echo_command "$ sudo rm -rf $BIN_PATH"
-    echo_command ""
-    echo_command "After that run this script again to reinstall rd-docker."
-    exit 1
-  fi
+show_uninstall_help() {
+  echo_command "You already have rd-docker installed. To reinstall it you must first uninstall it."
+  echo_command "You can do this by running the following command:"
+  echo_command ""
+  echo_command "$ sudo rm -rf $BIN_PATH"
+  echo_command ""
+  echo_command "After that run this script again to reinstall rd-docker."
 }
 
-check_dependencies() {
-  check_dependency "git"
-  check_dependency "curl"
+check_rddocker_installation() {
+  [ -f "$BIN_PATH" ]
+}
+
+validate_dependencies() {
+  validate_dependency "git"
+  validate_dependency "curl"
 }
 
 download_executable() {
   echo_command "Downloading rd-docker executable"
   curl -o "$BIN_PATH" "$DOWNLOAD_URL"
-}
-
-mark_as_executable() {
-  echo_command "Setting file permissions"
   chmod +x "$BIN_PATH"
 }
 
@@ -62,16 +58,6 @@ is_installed() {
     true
   else
     false
-  fi
-}
-
-try_to_install_engine_on_linux() {
-  if ! is_installed "docker"; then
-    install_docker
-  fi
-
-  if ! is_installed "docker-compose"; then
-    install_docker_compose
   fi
 }
 
@@ -86,12 +72,25 @@ install_docker_compose() {
   chmod +x /usr/local/bin/docker-compose
 }
 
-show_instructions_for_mac_os_x() {
+ensure_docker() {
+  if ! is_installed "docker"; then
+    install_docker
+  fi
+}
+
+ensure_docker_compose() {
+  if ! is_installed "docker-compose"; then
+    install_docker_compose
+  fi
+}
+
+
+show_mac_os_help() {
   echo_command "Please follow the following instructions to install docker engine on Mac OS X"
   echo_command "https://github.com/ResultadosDigitais/rd-product-team-wiki/wiki/Como-configurar-o-ambiente-de-desenvolvimento-utilizando-Docker#mac-os-x-109"
 }
 
-show_instructions_for_other_os() {
+show_other_os_help() {
   echo_command "Failed to automatically install Docker engine and Docker Compose."
   echo_command "Please check the following link for installing it in your OS and"
   echo_command "if there is no information, please update it."
@@ -101,26 +100,36 @@ show_instructions_for_other_os() {
 install_engine(){
   case `uname` in
     'Linux')
-      try_to_install_engine_on_linux
+      ensure_docker
+      ensure_docker_compose
       ;;
     'Darwin')
-      show_instructions_for_mac_os_x
+      show_mac_os_x_help
       ;;
     *)
-      show_instructions_for_other_os
+      show_other_os_help
       ;;
   esac
 }
 
-do_install() {
-  check_if_already_installed
-  check_dependencies
-  echo_command "Initializing rd-docker instalation proccess"
-  download_executable
-  mark_as_executable
-  install_engine
-  echo_command "Instalation finished successfully\n"
+validate_machine_state() {
+  validate_user_permission
+
+  if check_rddocker_installation; then
+    show_uninstall_help
+    exit 1
+  fi
+
+  validate_dependencies
 }
 
-check_for_sudo
+do_install() {
+  download_executable
+  install_engine
+}
+
+validate_machine_state
+
+echo_command "Initializing rd-docker instalation proccess"
 do_install
+echo_command "Instalation finished successfully\n"

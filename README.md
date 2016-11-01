@@ -19,25 +19,22 @@ To configure rd-docker first be shure to have docker-compose.yml configured on y
 ```
 IMAGE=resultadosdigitais/rdstation-dev:alpha
 MAIN_CONTAINER_NAME="web"
+APP_PREFIX="rdstation"
 ```
 
 ### Configuration options
 
-#### IMAGE (required):
+#### IMAGE:
 
 Docker image of the main application container. rd-docker will use it to auto update before server starts.
 
-#### MAIN_CONTAINER_NAME (required):
+#### MAIN_CONTAINER_NAME:
 
 The name of the main container on docker-compose.yml. It's the container where the project server runs.
 
-#### APP_PREFIX (optional):
+#### APP_PREFIX:
 
-The prefix which will be used on container names. Project folder name is used if it's omitted. Example:
-
-```
-APP_PREFIX="rdstation_"
-```
+The prefix which will be used on container and volume names. Example:
 
 ## Usage
 

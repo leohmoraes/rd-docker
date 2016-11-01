@@ -4,12 +4,9 @@ CLIENT_DIR="$HOME/.rd-docker"
 CLIENT_PATH="$CLIENT_DIR/rd-docker-cli"
 REPOSITORY="https://github.com/ResultadosDigitais/rd-docker.git"
 
-clone_repository() {
-  git clone "$REPOSITORY" "$CLIENT_DIR"
-}
-
+# If cli dir does not exist, clone repository
 if [[ ! -d "$CLIENT_DIR" ]]; then
-  clone_repository
+  git clone "$REPOSITORY" "$CLIENT_DIR"
 fi
 
 $CLIENT_PATH $@
