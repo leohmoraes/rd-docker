@@ -5,6 +5,7 @@ command=$1
 CURRENT_DIR="$(pwd)"
 CONFIG_FILE="rd-docker.config"
 RD_DOCKER_DIR="$(dirname $0)"
+UPDATE_CHECK_FILE="$RD_DOCKER_DIR/.last_update_check"
 header_indicator="==========>"
 command_indicator=">"
 
@@ -34,6 +35,24 @@ ensure_app_prefix(){
   if [[ "$APP_PREFIX" == "" ]]; then
     dirname="${CURRENT_DIR##*/}"
     APP_PREFIX="$(echo $dirname | sed 's/[-_ ]//g')"
+  fi
+}
+
+load_and_validate_config(){
+  load_config_file
+  validate_config
+  ensure_app_prefix
+}
+
+check_for_updates(){
+  touch "$UPDATE_CHECK_FILE"
+
+  today="$(date +%Y%m%d)"
+  last_update_check="$(cat $UPDATE_CHECK_FILE)"
+
+  if [[ "$today" > "$last_update_check" ]]; then
+    update_script
+    echo "$today" > "$UPDATE_CHECK_FILE"
   fi
 }
 
@@ -146,9 +165,8 @@ show_exec_help(){
   echo_command "    command       - command to be run inside the chosen container"
 }
 
-load_config_file
-validate_config
-ensure_app_prefix
+check_for_updates
+load_and_validate_config
 
 echo "$header_indicator Docker: $command"
 case "$command" in
