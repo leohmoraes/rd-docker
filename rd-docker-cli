@@ -174,7 +174,7 @@ case "$command" in
     ;;
   start | s)
     echo_command "Starting web application"
-    execute_command "web" "/var/app/entrypoint.sh"
+    execute_command "$MAIN_CONTAINER_NAME" "/var/app/entrypoint.sh"
     exit 0
     ;;
   stop)
@@ -185,7 +185,7 @@ case "$command" in
     ;;
   console | c)
     echo_command "Starting up TTY Session on main container"
-    execute_command "web" "bash"
+    execute_command "$MAIN_CONTAINER_NAME" "bash"
     exit 0
     ;;
   exec | e)
