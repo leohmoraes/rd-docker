@@ -26,10 +26,21 @@ validate_required_config(){
   fi
 }
 
-validate_required_configs(){
+validate_config_format(){
+  config=$1
+  format=$2
+  message=$3
+  if [[ ! "${!config}" =~ $format ]]; then
+    echo_command "Invalid configuration format: $message"
+    exit 1
+  fi
+}
+
+validate_configs(){
   validate_required_config "IMAGE"
   validate_required_config "MAIN_CONTAINER_NAME"
   validate_required_config "APP_PREFIX"
+  validate_config_format "APP_PREFIX" "^[a-zA-Z0-9]+$" "APP_PREFIX must contain only alphanumeric characters"
 }
 
 ensure_uptodate_rddocker(){
@@ -155,7 +166,7 @@ show_exec_help(){
 
 ensure_uptodate_rddocker
 load_config_file
-validate_required_configs
+validate_configs
 
 echo "$header_indicator Docker: $command"
 case "$command" in
