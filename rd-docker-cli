@@ -111,7 +111,7 @@ execute_command() {
   fi
 
   app=$1
-  cmd=$2
+  cmd=${@:2} # get all arguments except the first
 
   if [[ "$app" == "" ]]; then
     echo_command "Container app is a required parameter."
@@ -200,7 +200,7 @@ case "$command" in
     exit 0
     ;;
   exec | e)
-    execute_command $2 "$3"
+    execute_command ${@:2} # pass through all arguments except the first
     exit 0
     ;;
   *)
