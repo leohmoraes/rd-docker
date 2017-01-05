@@ -88,22 +88,6 @@ clear_volumes(){
   docker volume rm $(docker volume ls -q | grep "${APP_PREFIX}_") >> /dev/null 2>&1
 }
 
-# Infrastructure methods
-install_engine(){
-  if [[ `uname` != 'Linux' ]]; then
-    echo "Sorry, this only works on Linux right now :("
-    exit 1
-  fi
-  echo_command "Setting up workstation Ubuntu 14.04+"
-  # Install Docker
-  curl -fsS https://get.docker.com/ | bash
-
-  # Install Docker-Compose
-  curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
-  sudo usermod -aG docker $USER
-}
-
 execute_command() {
   if [[ "$1" == "help" ]]; then
     show_exec_help
@@ -147,7 +131,6 @@ echo_command(){
 
 show_help(){
   echo_command "RD Docker usage:"
-  echo_command "  install    - install docker and dependencies"
   echo_command "  update     - update rd-docker script"
   echo_command "  reset      - stop and remove all containers and drops all volumes within the compose "
   echo_command "  stop       - stop and remove all containers within the compose"
@@ -170,10 +153,6 @@ validate_configs
 
 echo "$header_indicator Docker: $command"
 case "$command" in
-  install)
-    install_engine
-    exit 0
-    ;;
   update)
     update_rddocker
     exit 0
