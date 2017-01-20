@@ -118,10 +118,20 @@ execute_command() {
   docker exec -it $container_id $cmd
 }
 
+run_boostrap_cmd(){
+  if [[ "$BOOTSTRAP_CMD" != "" ]]; then
+    echo_command "Running '$BOOTSTRAP_CMD' on '$MAIN_CONTAINER_NAME'"
+    main_container_id=$(get_container_id)
+    docker exec -t $main_container_id $BOOTSTRAP_CMD
+  fi
+}
+
 raise_infrastructure(){
   echo_command "Raising infrastructure"
   ensure_uptodate_image
   APP_PREFIX=$APP_PREFIX docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
+  run_boostrap_cmd
+  echo_command "Raised infrastructure"
 }
 
 # Instrumentation methods
