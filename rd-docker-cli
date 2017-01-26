@@ -142,9 +142,10 @@ echo_command(){
 show_help(){
   echo_command "RD Docker usage:"
   echo_command "  update     - update rd-docker script"
-  echo_command "  reset      - stop and remove all containers and drops all volumes within the compose "
+  echo_command "  purge      - stop and remove all containers and drops all volumes within the compose "
   echo_command "  stop       - stop and remove all containers within the compose"
   echo_command "  start, s   - execute web aplication on main container"
+  echo_command "  restart    - stop and remove all containers and start web aplication on main container"
   echo_command "  console, c - execute bash console on main container"
   echo_command "  exec, e    - ensure running infrastructure and execute a command in a given app container (ex: exec db \"psql -U postgres\")."
   echo_command "               for help on this subcommand (exec help)"
@@ -167,7 +168,7 @@ case "$command" in
     update_rddocker
     exit 0
     ;;
-  reset)
+  purge)
     clear_containers
     clear_volumes
     exit 0
@@ -181,6 +182,13 @@ case "$command" in
     echo_command "Stopping containers..."
     clear_containers
     echo_command "Stopping containers... Done"
+    exit 0
+    ;;
+  restart)
+    echo_command "Stopping containers..."
+    clear_containers
+    echo_command "Restarting web application"
+    execute_command "$MAIN_CONTAINER_NAME" "/var/app/entrypoint.sh"
     exit 0
     ;;
   console | c)
