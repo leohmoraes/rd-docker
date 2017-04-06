@@ -17,16 +17,11 @@ It will install rd-docker in your environment and if you use linux it will try t
 To configure rd-docker first be shure to have docker-compose.yml configured on your project folder. Then crate a file named **rd-docker.config** in your project folder like the following:
 
 ```
-IMAGE=resultadosdigitais/rdstation-dev:alpha
 MAIN_CONTAINER_NAME="web"
 APP_PREFIX="rdstation"
 ```
 
 ### Configuration options
-
-#### IMAGE:
-
-Docker image of the main application container. rd-docker will use it to auto update before server starts.
 
 #### MAIN_CONTAINER_NAME:
 
