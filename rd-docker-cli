@@ -37,7 +37,6 @@ validate_config_format(){
 }
 
 validate_configs(){
-  validate_required_config "IMAGE"
   validate_required_config "MAIN_CONTAINER_NAME"
   validate_required_config "APP_PREFIX"
   validate_config_format "APP_PREFIX" "^[a-zA-Z0-9]+$" "APP_PREFIX must contain only alphanumeric characters"
@@ -74,7 +73,7 @@ update_rddocker(){
 # Validation methods
 ensure_uptodate_image(){
   echo_command "Checking image updates..."
-  docker pull $IMAGE
+  docker-compose pull $MAIN_CONTAINER_NAME
 }
 
 # Housekeeping methods
