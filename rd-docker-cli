@@ -117,6 +117,14 @@ execute_command() {
   docker exec -it $container_id $cmd
 }
 
+spec_this_motherfucker(){
+  app='web'
+  cmd=${@:1} # get all arguments except the first
+  container_id=$(get_container_id $app)
+  echo_command "Running specs for the motherfucker '$cmd' on $app"
+  docker exec -i $container_id rspec $cmd
+}
+
 run_boostrap_cmd(){
   if [[ "$BOOTSTRAP_CMD" != "" ]]; then
     echo_command "Running '$BOOTSTRAP_CMD' on '$MAIN_CONTAINER_NAME'"
@@ -197,6 +205,10 @@ case "$command" in
     ;;
   exec | e)
     execute_command ${@:2} # pass through all arguments except the first
+    exit 0
+    ;;
+  rspec)
+    spec_this_motherfucker ${@:2}
     exit 0
     ;;
   *)
