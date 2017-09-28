@@ -130,6 +130,11 @@ raise_infrastructure(){
   ensure_uptodate_image
   APP_PREFIX=$APP_PREFIX docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
   run_boostrap_cmd
+  if [[ $? -ne 0 ]]; then
+    echo_command "Bootstraping failed, aborting"
+    clear_containers
+    exit 1
+  fi
   echo_command "Raised infrastructure"
 }
 
