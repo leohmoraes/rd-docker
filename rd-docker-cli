@@ -70,12 +70,6 @@ update_rddocker(){
   git -C "$RD_DOCKER_DIR" pull origin master
 }
 
-# Validation methods
-ensure_uptodate_image(){
-  echo_command "Checking image updates..."
-  docker-compose pull $MAIN_CONTAINER_NAME
-}
-
 # Housekeeping methods
 clear_containers(){
   echo_command "Removing possibly existing containers"
@@ -127,7 +121,6 @@ run_boostrap_cmd(){
 
 raise_infrastructure(){
   echo_command "Raising infrastructure"
-  ensure_uptodate_image
   APP_PREFIX=$APP_PREFIX docker-compose -p $APP_PREFIX run -d --service-ports $MAIN_CONTAINER_NAME tail -f /dev/null
   run_boostrap_cmd
   if [[ $? -ne 0 ]]; then
